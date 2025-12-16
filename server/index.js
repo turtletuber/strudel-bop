@@ -9,8 +9,10 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const SAMPLES_DIR = path.join(__dirname, '..', 'public', 'samples');
-const YT_DLP_PATH = '/opt/homebrew/bin/yt-dlp';
-const FFMPEG_PATH = '/opt/homebrew/bin/ffmpeg';
+
+// Detect yt-dlp and ffmpeg paths (works locally and on Railway)
+const YT_DLP_PATH = process.env.YT_DLP_PATH || 'yt-dlp';
+const FFMPEG_PATH = process.env.FFMPEG_PATH || 'ffmpeg';
 
 // Initialize Gemini (API key from environment)
 const genAI = process.env.GEMINI_API_KEY
