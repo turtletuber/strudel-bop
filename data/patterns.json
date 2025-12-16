@@ -1,0 +1,110 @@
+[
+  {
+    "id": "ai-1765210183451",
+    "name": "8 bit video game pop",
+    "description": "8 bit video game pop",
+    "code": "stack(\n  s(\"bd*2 sd*2\").gain(0.8),\n  s(\"hh*4\").gain(0.5),\n  note(\"<c4 d4 e4 g4>\").s(\"square\").cutoff(700).decay(0.3).gain(0.7),\n  note(\"<e4 g4 b4 c5>\").s(\"sawtooth\").cutoff(600).decay(0.2).gain(0.6)\n)",
+    "color": "#EC4899",
+    "bpm": 120,
+    "isAI": true
+  },
+  {
+    "id": "ai-1765210371592",
+    "name": "Can I have a punchy kick sampl...",
+    "description": "Can I have a punchy kick sample?",
+    "code": "stack(\n  s(\"bd*4\").gain(0.9),\n  s(\"~ sd ~ sd\").gain(0.7).room(0.3),\n  s(\"hh*8\").gain(0.4),\n  note(\"<c3 e3 g3>\").s(\"sawtooth\").cutoff(800).decay(0.2).gain(0.6)\n)",
+    "color": "#EC4899",
+    "bpm": 120,
+    "isAI": true
+  },
+  {
+    "id": "ai-1765210444707",
+    "name": "Only a punchy kick",
+    "description": "Only a punchy kick",
+    "code": "stack(\n  s(\"bd*8\").gain(0.9)\n)",
+    "color": "#EC4899",
+    "bpm": 120,
+    "isAI": true
+  },
+  {
+    "id": "ai-1765890289656",
+    "name": "8 bit cat",
+    "description": "8 bit cat",
+    "code": "stack(\n  s(\"bd hh sd hh [cp ~ cp] hh\").fast(2).gain(0.8),\n  note(\"<c2 g2 e3 c3>\").s(\"square\").slow(2).gain(0.7),\n  note(\"<c4 d4 e4 g4>\").s(\"sawtooth\").fast(4).gain(0.9),\n  note(\"<e3 g3 c4>\").s(\"triangle\").gain(0.6),\n  note(\"c5\").s(\"sine\").slow(4).gain(0.4)\n)",
+    "color": "#EC4899",
+    "bpm": 120,
+    "isAI": true
+  },
+  {
+    "id": "ai-1765890662679",
+    "name": "big old yawn",
+    "description": "big old yawn",
+    "code": "note(\"<c2 d2 b1 g1>\").s(\"sawtooth\").cutoff(1100).slow(2.75).decay(1.45).room(0.9).gain(0.7)",
+    "color": "#EC4899",
+    "bpm": 120,
+    "isAI": true
+  },
+  {
+    "id": "ai-1765892878950",
+    "name": "angelic soft synth",
+    "description": "angelic soft synth",
+    "code": "stack(\n  note(\"<c4 e4 g4 b4> <g4 c5 e5> <a4 e5 g5> <f4 a4 c5>\").spread().fast(4).s(\"triangle\").gain(0.84).room(0.85).decay(1.55),\n  note(\"<c3 g3 e4> <a3 e4 c4>\").s(\"sine\").gain(0.4).room(0.8).decay(1.2).slow(2)\n)",
+    "color": "#EC4899",
+    "bpm": 120,
+    "isAI": true
+  },
+  {
+    "id": "ai-1765893054737",
+    "name": "goth melodic house",
+    "description": "goth melodic house",
+    "code": "stack(\n  s(\"bd*4\").gain(0.9).decay(0.08),\n  s(\"~ cp ~ cp\").gain(0.7).decay(0.1).room(0.1),\n  s(\"hh ~ hh ~ hh hh ~ hh\").fast(2).gain(0.4).decay(0.05).pan(\"<0.2 0.8>\"),\n  note(\"c2 g1 a1 f1\").s(\"sawtooth\").gain(0.7).decay(0.6).cutoff(350).room(0.1),\n  note(\"<c3 eb3 g3 bb3> <d3 f3 a3 c4> <eb3 g3 bb3 d4> <c3 eb3 g3 bb3>\").s(\"square\").gain(0.5).decay(1.5).room(0.7).cutoff(600).slow(0.5),\n  note(\"g4 eb4 c4 bb3 f4 d4 c4 eb4\").s(\"triangle\").gain(0.6).decay(0.2).room(0.1).cutoff(1200).fast(1.5)\n)",
+    "color": "#EC4899",
+    "bpm": 120,
+    "isAI": true
+  },
+  {
+    "id": "ai-1765893188751",
+    "name": "goth melodic house synth ",
+    "description": "goth melodic house synth ",
+    "code": "stack(\n  s(\"bd*4\").gain(0.8),\n  s(\"~ cp ~ cp\").gain(0.92).pan(0.5),\n  note(\"<c2 f2 g2 bb2>\").s(\"square\").gain(0.23).decay(0).cutoff(550).room(0.54),\n  note(\"<c4 ~ g4 ~ e4 ~ bb4> <a4 ~ f4 ~ d4 ~ bb4>\").s(\"sawtooth\").gain(0.6).room(0.3).cutoff(1500).decay(0.5).fast(2),\n  s(\"hh*8\").gain(0.4).cutoff(8000).room(0.1),\n  note(\"<c3 g3 e4 bb4>\").s(\"triangle\").gain(0.4).room(0.6).cutoff(800).decay(1.5).slow(2)\n)",
+    "color": "#EC4899",
+    "bpm": 120,
+    "isAI": true
+  },
+  {
+    "id": "ai-1765893283937",
+    "name": "chopped vocals angelic ",
+    "description": "chopped vocals angelic ",
+    "code": "stack(\n  note(\"<c4 e4 g4 b4>\").s(\"sine\").room(0.9).decay(0.89).gain(0.7).cutoff(3250),\n  note(\"<c5 e5 g5 c6>\").s(\"triangle\").decay(0.21).room(0.74).fast(3.25).gain(0.5).pan(0.2),\n  note(\"<g5 c6 e6 g6>\").s(\"triangle\").decay(0.08).room(0.59).fast(4).gain(0.5).pan(0.8)\n)",
+    "color": "#EC4899",
+    "bpm": 120,
+    "isAI": true
+  },
+  {
+    "id": "ai-1765893968851",
+    "name": "looping angelic cathedral synt...",
+    "description": "looping angelic cathedral synth inspired by andrea bocelli",
+    "code": "stack(\n  note(\"<c5 e5 g5> <g5 b5 d6> <a5 c6 e6> <f5 a5 c6>\")\n    .s(\"triangle\")\n    .slow(0.5)\n    .gain(0.09)\n    .decay(0.55)\n    .room(0.65),\n  note(\"<c6 e6 g6> <d6 g6 b6> <e6 g6 c7> <f6 a6 c7>\")\n    .s(\"sine\")\n    .slow(0.5)\n    .gain(0.11)\n    .decay(2)\n    .room(0.8)\n    .pan(range(0.2, 0.8, 0.2))\n)",
+    "color": "#EC4899",
+    "bpm": 120,
+    "isAI": true
+  },
+  {
+    "id": "ai-1765894136624",
+    "name": "sleep token inspired electroni...",
+    "description": "sleep token inspired electronic music",
+    "code": "stack(\n  s(\"bd ~ bd ~ bd bd ~ bd\").gain(0.9).room(0.1),\n  s(\"~ sd ~ cp ~ sd ~ cp\").gain(0.7).room(0.08).decay(0.1),\n  s(\"hh hh hh hh\").fast(2).gain(0.4).decay(0.05).pan(\"<0.1 -0.1>\").room(0.05),\n  note(\"<c2 f2 g2 c2>\").s(\"square\").gain(0.7).decay(0.7).cutoff(200).room(0.2),\n  note(\"<c4 eb4 g4> <f4 ab4 c5> <g4 bb4 d5> <c4 eb4 g4>\").s(\"sawtooth\").gain(0.4).room(0.6).decay(1.8).cutoff(900)\n)",
+    "color": "#EC4899",
+    "bpm": 120,
+    "isAI": true
+  },
+  {
+    "id": "ai-1765894360283",
+    "name": "water droplets hitting a windo...",
+    "description": "water droplets hitting a window",
+    "code": "stack(\n  s(\"~ cp ~ ~ ~ cp ~ cp ~ ~ cp ~ ~ ~ ~ cp ~ cp ~ ~ ~ cp ~\")\n    .decay(0.08)\n    .room(0.4)\n    .gain(\"<0.5 0.6 0.7 0.55 0.65>\")\n    .pan(\"<0.2 0.8 0.5 0.3 0.7 0.4 0.6>\")\n    .fast(0.7),\n\n  note(\"<f6 g6 a6 c7>\")\n    .s(\"sine\")\n    .decay(0.1)\n    .room(0.3)\n    .gain(\"<0.2 0.3 0.25>\")\n    .pan(\"<0.1 0.9 0.4 0.6>\")\n    .cutoff(5000)\n    .fast(0.6)\n)",
+    "color": "#EC4899",
+    "bpm": 120,
+    "isAI": true
+  }
+]
