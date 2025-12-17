@@ -479,7 +479,7 @@ main {
   position: fixed;
   inset: 0;
   background: rgba(0, 0, 0, 0.75);
-  z-index: 1000;
+  z-index: 2000;
   backdrop-filter: blur(4px);
   animation: fadeIn 0.2s ease;
 }
@@ -501,7 +501,7 @@ main {
   background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
   border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 16px;
-  z-index: 1001;
+  z-index: 2001;
   width: 90vw;
   max-width: 420px;
   max-height: 85vh;
