@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+const BASE_URL = API_URL.replace('/api', ''); // Base URL without /api suffix
 
 export function SampleDownloader({ onSampleDownloaded }) {
   const [url, setUrl] = useState('');
@@ -216,7 +217,7 @@ export function SampleDownloader({ onSampleDownloaded }) {
                   <button
                     className="play-sample-btn"
                     onClick={() => {
-                      const audio = new Audio(`http://localhost:3001${sample.path}`);
+                      const audio = new Audio(`${BASE_URL}${sample.path}`);
                       audio.play();
                     }}
                     title="Preview"
@@ -228,7 +229,7 @@ export function SampleDownloader({ onSampleDownloaded }) {
                   <button
                     className="copy-sample-btn"
                     onClick={() => {
-                      navigator.clipboard.writeText(`samples("http://localhost:3001${sample.path}")`);
+                      navigator.clipboard.writeText(`samples("${BASE_URL}${sample.path}")`);
                     }}
                     title="Copy Strudel code"
                   >

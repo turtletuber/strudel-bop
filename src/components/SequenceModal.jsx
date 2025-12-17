@@ -181,7 +181,7 @@ export function SequenceModal({
   const [localCode, setLocalCode] = useState(sequence?.code || '');
   const [params, setParams] = useState([]);
   const [steps, setSteps] = useState(new Array(16).fill(false));
-  const [loopBars, setLoopBars] = useState(4);
+  const [loopBars, setLoopBars] = useState(16);
   const [numSteps, setNumSteps] = useState(16);
   const [soundName, setSoundName] = useState('bd');
   // Default to 'code' view for regular patterns, 'sequencer' for samples/simple patterns
@@ -189,11 +189,12 @@ export function SequenceModal({
 
   const isSample = sequence?.isSample;
   const isSimple = isSimplePattern(sequence?.code);
-  const canUseSequencer = isSample || isSimple;
+  const canUseSequencer = !isSample && isSimple; // Samples don't get sequencer anymore
 
   // Reset view mode when sequence changes
   useEffect(() => {
-    setViewMode((sequence?.isSample || isSimplePattern(sequence?.code)) ? 'sequencer' : 'code');
+    // Samples always use code view now, simple patterns use sequencer
+    setViewMode((isSimplePattern(sequence?.code) && !sequence?.isSample) ? 'sequencer' : 'code');
   }, [sequence?.id, sequence?.isSample, sequence?.code]);
 
   // Update local code when sequence changes
@@ -230,13 +231,11 @@ export function SequenceModal({
     }
   }, [sequence?.code, sequence?.isSample]);
 
-  // Extract parameters when code changes (for non-samples)
+  // Extract parameters when code changes (now includes samples!)
   useEffect(() => {
-    if (!isSample) {
-      const extracted = extractParameters(localCode);
-      setParams(extracted);
-    }
-  }, [localCode, isSample]);
+    const extracted = extractParameters(localCode);
+    setParams(extracted);
+  }, [localCode]);
 
   // Group parameters by name (aggregate duplicates)
   const groupedParams = useMemo(() => {
@@ -382,6 +381,9 @@ export function SequenceModal({
                         <option value={2}>2 bars</option>
                         <option value={4}>4 bars</option>
                         <option value={8}>8 bars</option>
+                        <option value={16}>16 bars</option>
+                        <option value={32}>32 bars</option>
+                        <option value={64}>64 bars</option>
                       </select>
                     </label>
                   )}

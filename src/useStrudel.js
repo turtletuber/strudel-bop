@@ -80,6 +80,9 @@ async function initStrudel() {
 // Track which patterns are currently playing
 let activeTracks = new Set();
 
+// Track direct audio playback (for samples not using Strudel patterns)
+let directAudioSources = new Map(); // trackId -> AudioBufferSourceNode
+
 export function useStrudel() {
   const [isPlaying, setIsPlaying] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -140,8 +143,16 @@ export function useStrudel() {
 
       // Pre-load sample if URL provided (bypasses transpiler parsing)
       if (sampleUrl && samplesFunction) {
-        console.log('Pre-loading sample:', sampleUrl);
-        await samplesFunction({ _smp: sampleUrl });
+        console.log('Pre-loading sample with key "_smp":', sampleUrl);
+        try {
+          await samplesFunction({ _smp: sampleUrl });
+          console.log('Sample loaded successfully!');
+        } catch (err) {
+          console.error('Failed to load sample:', err);
+          setError('Failed to load sample: ' + err.message);
+          setIsLoading(false);
+          return false;
+        }
       }
 
       console.log('Evaluating pattern for track:', trackId, 'exclusive:', exclusive);
@@ -292,6 +303,120 @@ export function useStrudel() {
     return activeTrackIds.has(trackId);
   }, [activeTrackIds]);
 
+  // Play sample directly using Web Audio API (bypass Strudel for one-shot samples)
+  const playDirectAudio = useCallback(async (sampleUrl, trackId, options = {}) => {
+    const {
+      volume = 0.8,
+      playbackRate = 1.0,
+      loop = false,
+      startTime = 0,
+      endTime = null
+    } = options;
+
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      // Initialize if needed
+      if (!isReady || !globalAudioContext) {
+        const success = await initialize();
+        if (!success) {
+          setIsLoading(false);
+          return false;
+        }
+      }
+
+      // Resume audio context if needed
+      if (globalAudioContext?.state === 'suspended') {
+        await globalAudioContext.resume();
+      }
+
+      // Stop any existing playback for this track
+      if (directAudioSources.has(trackId)) {
+        const oldSource = directAudioSources.get(trackId);
+        oldSource.stop();
+        directAudioSources.delete(trackId);
+      }
+
+      console.log('Loading audio file directly:', sampleUrl, 'options:', options);
+
+      // Fetch and decode audio file
+      const response = await fetch(sampleUrl);
+      const arrayBuffer = await response.arrayBuffer();
+      const audioBuffer = await globalAudioContext.decodeAudioData(arrayBuffer);
+
+      // Create source and gain nodes
+      const source = globalAudioContext.createBufferSource();
+      const gainNode = globalAudioContext.createGain();
+
+      source.buffer = audioBuffer;
+      source.playbackRate.value = playbackRate;
+      source.loop = loop;
+      gainNode.gain.value = volume;
+
+      // Connect: source -> gain -> destination
+      source.connect(gainNode);
+      gainNode.connect(globalAudioContext.destination);
+
+      // Store source and gain for later control
+      directAudioSources.set(trackId, { source, gainNode });
+      activeTracks.add(trackId);
+      setActiveTrackIds(new Set(activeTracks));
+
+      // Play with optional start/end times
+      const duration = endTime ? endTime - startTime : audioBuffer.duration - startTime;
+      source.start(0, startTime, duration > 0 ? duration : undefined);
+      setIsPlaying(true);
+      setIsLoading(false);
+
+      // Clean up when finished (if not looping)
+      if (!loop) {
+        source.onended = () => {
+          directAudioSources.delete(trackId);
+          activeTracks.delete(trackId);
+          setActiveTrackIds(new Set(activeTracks));
+          if (activeTracks.size === 0) {
+            setIsPlaying(false);
+          }
+        };
+      }
+
+      console.log('Direct audio playback started for track:', trackId);
+      return true;
+    } catch (err) {
+      console.error('Direct audio playback error:', err);
+      setError(err.message);
+      setIsLoading(false);
+      return false;
+    }
+  }, [isReady, initialize]);
+
+  // Stop direct audio playback for a track
+  const stopDirectAudio = useCallback((trackId) => {
+    if (directAudioSources.has(trackId)) {
+      const { source } = directAudioSources.get(trackId);
+      try {
+        source.stop();
+      } catch (e) {
+        // Already stopped
+      }
+      directAudioSources.delete(trackId);
+      activeTracks.delete(trackId);
+      setActiveTrackIds(new Set(activeTracks));
+      if (activeTracks.size === 0) {
+        setIsPlaying(false);
+      }
+    }
+  }, []);
+
+  // Update volume for direct audio playback
+  const updateDirectAudioVolume = useCallback((trackId, volume) => {
+    if (directAudioSources.has(trackId)) {
+      const { gainNode } = directAudioSources.get(trackId);
+      gainNode.gain.value = volume;
+    }
+  }, []);
+
   return {
     isPlaying,
     isLoading,
@@ -305,5 +430,8 @@ export function useStrudel() {
     setCps,
     initialize,
     isTrackPlaying,
+    playDirectAudio,
+    stopDirectAudio,
+    updateDirectAudioVolume,
   };
 }

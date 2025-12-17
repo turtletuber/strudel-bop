@@ -106,5 +106,14 @@
     "color": "#EC4899",
     "bpm": 120,
     "isAI": true
+  },
+  {
+    "id": "ai-1765906427759",
+    "name": "Deep base Pookie",
+    "description": "Deep base Pookie",
+    "code": "stack(\n  s(\"bd*4\").gain(0.9),\n  s(\"~ sd ~ hh\").fast(2).pan(0.2).gain(0.7),\n  note(\"<c3 e3 g3 c4>\").s(\"sawtooth\").cutoff(800).room(0.3).decay(0.1).gain(0.6)\n)",
+    "color": "#EC4899",
+    "bpm": 120,
+    "isAI": true
   }
 ]

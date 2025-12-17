@@ -115,6 +115,12 @@ export function SampleTile({ onSampleAdded, savedSamples = [] }) {
     }
   };
 
+  const handleTimeInputKeyDown = (e) => {
+    if (e.key === 'Enter' && info && !downloading) {
+      downloadSample();
+    }
+  };
+
   const formatDuration = (seconds) => {
     if (!seconds) return '--:--';
     const mins = Math.floor(seconds / 60);
@@ -214,7 +220,7 @@ export function SampleTile({ onSampleAdded, savedSamples = [] }) {
           {loading && <span className="loading-spinner small" />}
         </div>
       ) : (
-        <div className="sample-info">
+        <div className="sample-info" onKeyDown={handleTimeInputKeyDown}>
           <div className="sample-meta">
             <span className="sample-duration">{formatDuration(info.duration)}</span>
           </div>

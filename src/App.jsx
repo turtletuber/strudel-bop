@@ -11,11 +11,20 @@ import { useStrudel } from './useStrudel';
 import './App.css';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+const BASE_URL = API_URL.replace('/api', ''); // Base URL without /api suffix
 
 // Initialize per-track settings
 const initialTrackSettings = {};
 initialSequences.forEach(seq => {
-  initialTrackSettings[seq.id] = { volume: 80, reverb: 20 };
+  initialTrackSettings[seq.id] = {
+    volume: 80,
+    reverb: 20,
+    // Sample-specific settings
+    playbackRate: 1.0,
+    loop: false,
+    startTime: 0,
+    endTime: null
+  };
 });
 
 function App() {
@@ -24,6 +33,7 @@ function App() {
   const [trackSettings, setTrackSettings] = useState(initialTrackSettings);
   const [multiTrackMode, setMultiTrackMode] = useState(true);
   const [modalSequence, setModalSequence] = useState(null);
+  const [codeUpdateCounter, setCodeUpdateCounter] = useState(0);
 
   const {
     isPlaying,
@@ -37,7 +47,10 @@ function App() {
     hush,
     setCps,
     initialize,
-    isTrackPlaying
+    isTrackPlaying,
+    playDirectAudio,
+    stopDirectAudio,
+    updateDirectAudioVolume
   } = useStrudel();
 
   // Build the code with current settings for a given sequence
@@ -51,10 +64,13 @@ function App() {
     const vol = settings.volume;
     const rev = settings.reverb;
 
-    // For samples, we need to handle differently - load sample separately
+    // For samples, extract the base code without gain/room and apply fresh settings
     if (seq.isSample) {
+      // Remove any existing .gain() and .room() from the code (but keep other methods like .cut())
+      const baseCode = seq.code.replace(/\.gain\([^)]*\)/g, '').replace(/\.room\([^)]*\)/g, '').trim();
+      console.log('Building sample code:', baseCode);
       return `setcps(${adjustedCps.toFixed(4)})
-s("_smp").loopAt(4).gain(${(vol / 100).toFixed(2)}).room(${(rev / 100).toFixed(2)})`;
+${baseCode}.gain(${(vol / 100).toFixed(2)}).room(${(rev / 100).toFixed(2)})`;
     }
 
     return `setcps(${adjustedCps.toFixed(4)})
@@ -69,22 +85,41 @@ ${seq.code.trim()}
     const code = buildCode(index);
     const trackId = seq.id;
     // For samples, pass the URL to pre-load before evaluating
-    const sampleUrl = seq.isSample ? `http://localhost:3001${seq.samplePath}` : null;
+    const sampleUrl = seq.isSample ? `${BASE_URL}${seq.samplePath}` : null;
     await play(code, trackId, exclusive, sampleUrl);
   }, [sequences, buildCode, play]);
 
   // Handle sequence card click
   const handleSequenceClick = async (index) => {
-    const trackId = sequences[index].id;
+    const seq = sequences[index];
+    const trackId = seq.id;
     const trackPlaying = isTrackPlaying(trackId);
 
     if (trackPlaying) {
       // If this track is playing, stop it
-      await stopTrack(trackId);
+      if (seq.isSample) {
+        stopDirectAudio(trackId);
+      } else {
+        await stopTrack(trackId);
+      }
     } else {
       // Play the track
-      // In multi-track mode, add to existing; in single mode, replace
-      await playSequence(index, !multiTrackMode);
+      if (seq.isSample) {
+        // For samples, play directly using Web Audio API (no Strudel patterns)
+        const sampleUrl = `${BASE_URL}${seq.samplePath}`;
+        const settings = trackSettings[seq.id] || {};
+        await playDirectAudio(sampleUrl, trackId, {
+          volume: (settings.volume ?? 80) / 100,
+          playbackRate: settings.playbackRate ?? 1.0,
+          loop: settings.loop ?? false,
+          startTime: settings.startTime ?? 0,
+          endTime: settings.endTime ?? null
+        });
+      } else {
+        // For regular patterns, use Strudel
+        // In multi-track mode, add to existing; in single mode, replace
+        await playSequence(index, !multiTrackMode);
+      }
     }
   };
 
@@ -125,14 +160,21 @@ ${seq.code.trim()}
       [trackId]: { ...prev[trackId], volume: newVolume }
     }));
 
-    // If this track is playing, re-evaluate it
+    // If this track is playing, update it
     if (isTrackPlaying(trackId)) {
       const index = sequences.findIndex(s => s.id === trackId);
       if (index !== -1) {
         const seq = sequences[index];
-        const code = buildCode(index, { volume: newVolume, reverb: trackSettings[trackId].reverb });
-        const sampleUrl = seq.isSample ? `http://localhost:3001${seq.samplePath}` : null;
-        await play(code, trackId, false, sampleUrl);
+
+        if (seq.isSample) {
+          // For direct audio samples, just update the gain node
+          updateDirectAudioVolume(trackId, newVolume / 100);
+        } else {
+          // For Strudel patterns, re-evaluate
+          const code = buildCode(index, { volume: newVolume, reverb: trackSettings[trackId].reverb });
+          const sampleUrl = seq.isSample ? `${BASE_URL}${seq.samplePath}` : null;
+          await play(code, trackId, false, sampleUrl);
+        }
       }
     }
   };
@@ -151,8 +193,36 @@ ${seq.code.trim()}
       if (index !== -1) {
         const seq = sequences[index];
         const code = buildCode(index, { volume: trackSettings[trackId].volume, reverb: newReverb });
-        const sampleUrl = seq.isSample ? `http://localhost:3001${seq.samplePath}` : null;
+        const sampleUrl = seq.isSample ? `${BASE_URL}${seq.samplePath}` : null;
         await play(code, trackId, false, sampleUrl);
+      }
+    }
+  };
+
+  // Update sample-specific settings
+  const handleSampleSettingChange = async (trackId, setting, value) => {
+    // Update state
+    setTrackSettings(prev => ({
+      ...prev,
+      [trackId]: { ...prev[trackId], [setting]: value }
+    }));
+
+    // If playing, restart with new settings
+    if (isTrackPlaying(trackId)) {
+      const index = sequences.findIndex(s => s.id === trackId);
+      if (index !== -1) {
+        const seq = sequences[index];
+        if (seq.isSample) {
+          const sampleUrl = `${BASE_URL}${seq.samplePath}`;
+          const newSettings = { ...trackSettings[trackId], [setting]: value };
+          await playDirectAudio(sampleUrl, trackId, {
+            volume: (newSettings.volume ?? 80) / 100,
+            playbackRate: newSettings.playbackRate ?? 1.0,
+            loop: newSettings.loop ?? false,
+            startTime: newSettings.startTime ?? 0,
+            endTime: newSettings.endTime ?? null
+          });
+        }
       }
     }
   };
@@ -175,24 +245,48 @@ ${seq.code.trim()}
     setSequences(prev => prev.map(s =>
       s.id === sequenceId ? { ...s, code: newCode } : s
     ));
+    // Increment counter to force preview re-render
+    setCodeUpdateCounter(prev => prev + 1);
 
     // If the track is playing, re-evaluate it with new code
     if (isTrackPlaying(sequenceId)) {
       const index = sequences.findIndex(s => s.id === sequenceId);
       if (index !== -1) {
-        const seq = { ...sequences[index], code: newCode };
-        const baseCps = seq.bpm / 240;
-        const adjustedCps = baseCps * (tempo / 100);
-        const settings = trackSettings[sequenceId];
-        const fullCode = `setcps(${adjustedCps.toFixed(4)})
-${newCode.trim()}
-.gain(${(settings.volume / 100).toFixed(2)})
-.room(${(settings.reverb / 100).toFixed(2)})`;
-        await play(fullCode, sequenceId, false);
+        const seq = sequences[index];
+        // Use buildCode to apply volume/reverb settings consistently
+        const updatedSequences = sequences.map(s =>
+          s.id === sequenceId ? { ...s, code: newCode } : s
+        );
+        const updatedIndex = updatedSequences.findIndex(s => s.id === sequenceId);
+
+        // Temporarily update sequences for buildCode
+        const tempBuildCode = (idx) => {
+          const sequence = updatedSequences[idx];
+          const baseCps = sequence.bpm / 240;
+          const adjustedCps = baseCps * (tempo / 100);
+          const settings = trackSettings[sequence.id];
+          const vol = settings.volume;
+          const rev = settings.reverb;
+
+          if (sequence.isSample) {
+            const baseCode = sequence.code.replace(/\.gain\([^)]*\)/g, '').replace(/\.room\([^)]*\)/g, '').trim();
+            return `setcps(${adjustedCps.toFixed(4)})
+${baseCode}.gain(${(vol / 100).toFixed(2)}).room(${(rev / 100).toFixed(2)})`;
+          }
+
+          return `setcps(${adjustedCps.toFixed(4)})
+${sequence.code.trim()}
+.gain(${(vol / 100).toFixed(2)})
+.room(${(rev / 100).toFixed(2)})`;
+        };
+
+        const code = tempBuildCode(updatedIndex);
+        const sampleUrl = seq.isSample ? `${BASE_URL}${seq.samplePath}` : null;
+        await play(code, sequenceId, false, sampleUrl);
       }
     }
 
-    // If it's an AI pattern, save the updated code to the server
+    // If it's an AI pattern or sample, save the updated code to the server
     const sequence = sequences.find(s => s.id === sequenceId);
     if (sequence?.isAI) {
       try {
@@ -204,6 +298,10 @@ ${newCode.trim()}
       } catch (err) {
         console.error('Failed to save updated pattern:', err);
       }
+    } else if (sequence?.isSample) {
+      // Samples are stored on disk, not in patterns.json
+      // The code change is already in state and will persist
+      console.log('Sample code updated in state');
     }
   };
 
@@ -263,11 +361,11 @@ ${newCode.trim()}
     id: `sample-${sample.name.replace(/\.[^.]+$/, '')}`,
     name: sample.name.replace(/\.[^.]+$/, '').replace(/_/g, ' '),
     color: '#F97316', // Orange for samples
-    bpm: 120,
+    bpm: 120, // Use default BPM
     description: 'Downloaded sample',
     isSample: true,
     samplePath: sample.path,
-    code: `samples({ mysample: "http://localhost:3001${sample.path}" }); s("mysample").loopAt(4)`
+    code: `s("_smp").cut(1).slow(2)` // slow(2) = plays every 4 seconds (fast restart but starts immediately)
   });
 
   // Handle sample downloaded - add as playable tile
@@ -276,7 +374,14 @@ ${newCode.trim()}
     setSequences(prev => [...prev, sampleSeq]);
     setTrackSettings(prev => ({
       ...prev,
-      [sampleSeq.id]: { volume: 80, reverb: 20 }
+      [sampleSeq.id]: {
+        volume: 80,
+        reverb: 20,
+        playbackRate: 1.0,
+        loop: false,
+        startTime: 0,
+        endTime: null
+      }
     }));
   };
 
@@ -404,12 +509,18 @@ ${newCode.trim()}
               reverb={trackSettings[seq.id]?.reverb ?? 20}
               onVolumeChange={handleTrackVolumeChange}
               onReverbChange={handleTrackReverbChange}
+              // Sample-specific settings
+              playbackRate={trackSettings[seq.id]?.playbackRate ?? 1.0}
+              loop={trackSettings[seq.id]?.loop ?? false}
+              startTime={trackSettings[seq.id]?.startTime ?? 0}
+              endTime={trackSettings[seq.id]?.endTime ?? null}
+              onSampleSettingChange={handleSampleSettingChange}
             />
           ))}
         </div>
 
         {activeCount > 0 && (
-          <div className="code-preview">
+          <div className="code-preview" key={codeUpdateCounter}>
             <div className="code-header">
               <span>{activeCount > 1 ? 'Active Pattern Codes' : 'Current Pattern Code'}</span>
               <button
@@ -442,7 +553,7 @@ ${newCode.trim()}
       </footer>
 
       <SequenceModal
-        sequence={modalSequence}
+        sequence={modalSequence ? sequences.find(s => s.id === modalSequence.id) || modalSequence : null}
         isOpen={!!modalSequence}
         onClose={() => setModalSequence(null)}
         onCodeChange={handleModalCodeChange}

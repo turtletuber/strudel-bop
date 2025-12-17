@@ -12,7 +12,7 @@ const SAMPLES_DIR = path.join(__dirname, '..', 'public', 'samples');
 
 // Detect yt-dlp and ffmpeg paths (works locally and on Railway)
 const YT_DLP_PATH = process.env.YT_DLP_PATH || 'yt-dlp';
-const FFMPEG_PATH = process.env.FFMPEG_PATH || 'ffmpeg';
+const FFMPEG_PATH = process.env.FFMPEG_PATH || '/opt/homebrew/bin/ffmpeg';
 
 // Initialize Gemini (API key from environment)
 const genAI = process.env.GEMINI_API_KEY
