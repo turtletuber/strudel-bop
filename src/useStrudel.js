@@ -127,18 +127,19 @@ export function useStrudel() {
     setError(null);
 
     try {
-      // Initialize if needed
+      // CRITICAL: Resume audio context FIRST, synchronously with user gesture
+      // This must happen before any async operations to work on iOS/mobile
+      if (globalAudioContext?.state === 'suspended') {
+        await globalAudioContext.resume();
+      }
+
+      // Initialize if needed (after resuming context)
       if (!isReady || !replRef.current) {
         const success = await initialize();
         if (!success) {
           setIsLoading(false);
           return false;
         }
-      }
-
-      // Resume audio context if needed
-      if (globalAudioContext?.state === 'suspended') {
-        await globalAudioContext.resume();
       }
 
       // Pre-load sample if URL provided (bypasses transpiler parsing)
