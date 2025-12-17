@@ -236,7 +236,7 @@ app.post('/api/generate', async (req, res) => {
 
   try {
     const model = genAI.getGenerativeModel({
-      model: 'gemini-2.5-flash'
+      model: 'gemini-1.5-flash'
     });
 
     const fullPrompt = STRUDEL_SYSTEM_PROMPT + '\n\n' + prompt;
