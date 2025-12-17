@@ -115,5 +115,59 @@
     "color": "#EC4899",
     "bpm": 120,
     "isAI": true
+  },
+  {
+    "id": "ai-1765943634079",
+    "name": "test",
+    "description": "test",
+    "code": "stack(\n  s(\"bd*2 hh*2\").gain(0.8).fast(2),\n  s(\"~ sd ~ sd\").gain(0.6).room(0.2),\n  note(\"<c3 g3 c4 e4>\").s(\"sawtooth\").gain(0.7).cutoff(800).decay(0.1)\n)",
+    "color": "#EC4899",
+    "bpm": 120,
+    "isAI": true
+  },
+  {
+    "id": "ai-1765943987221",
+    "name": "test",
+    "description": "test",
+    "code": "stack(\n  s(\"bd*4\").gain(0.9).pan(0.2),\n  s(\"~ sd ~ sd\").gain(0.7).room(0.3),\n  s(\"hh*8\").gain(0.5).fast(2),\n  note(\"<c3 e3 g3 c4>\").s(\"sawtooth\").gain(0.6).cutoff(800).decay(0.1)\n)",
+    "color": "#EC4899",
+    "bpm": 120,
+    "isAI": true
+  },
+  {
+    "id": "ai-1765944121096",
+    "name": "cat tes",
+    "description": "cat tes",
+    "code": "stack(\n  s(\"cp ~ hh ~\").gain(0.7).pan(0.2),\n  s(\"bd ~ ~ ~\").gain(0.9),\n  note(\"<c3 e3 g3 c4>\").s(\"sawtooth\").gain(0.6).cutoff(800).decay(0.1)\n)",
+    "color": "#EC4899",
+    "bpm": 120,
+    "isAI": true
+  },
+  {
+    "id": "ai-1765944165153",
+    "name": "cat test",
+    "description": "cat test",
+    "code": "stack(\n  s(\"bd*4\").gain(0.9),\n  s(\"~ sd ~ sd\").fast(2).decay(0.1).pan(0.2),\n  note(\"<c3 e3 g3>\").s(\"sawtooth\").cutoff(1000).room(0.3).gain(0.7),\n  s(\"hh*8\").gain(0.5).pan(0.8)\n)",
+    "color": "#EC4899",
+    "bpm": 120,
+    "isAI": true
+  },
+  {
+    "id": "ai-1765944250067",
+    "name": "cute",
+    "description": "cute",
+    "code": "stack(\n  note(\"<c4 e4 g4 e4>\").s(\"triangle\").fast(2).gain(0.7).room(0.3),\n  s(\"hh*2 cp hh*2 cp\").gain(0.6).pan(0.2),\n  note(\"c3 ~ e3 ~\").s(\"sine\").slow(2).gain(0.5).decay(0.5).cutoff(800)\n)",
+    "color": "#EC4899",
+    "bpm": 120,
+    "isAI": true
+  },
+  {
+    "id": "ai-1765944266198",
+    "name": "kawaii",
+    "description": "kawaii",
+    "code": "stack(\n  s(\"hh ~ cp ~\").gain(0.7).pan(0.2),\n  s(\"~ hh ~ cp\").gain(0.7).pan(0.8),\n  note(\"<c4 e4 g4 a4>\").s(\"sine\").fast(2).gain(0.6).room(0.4).decay(0.3),\n  note(\"c3\").s(\"triangle\").slow(2).gain(0.5).cutoff(800).room(0.2)\n)",
+    "color": "#EC4899",
+    "bpm": 120,
+    "isAI": true
   }
 ]

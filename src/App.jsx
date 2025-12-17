@@ -3,9 +3,7 @@ import { sequences as initialSequences } from './sequences';
 import { SequenceCard } from './components/SequenceCard';
 import { Controls } from './components/Controls';
 import { Visualizer } from './components/Visualizer';
-import { AIPromptTile } from './components/AIPromptTile';
-import { SampleTile } from './components/SampleTile';
-import { RecordingTile } from './components/RecordingTile';
+import { AddMenu } from './components/AddMenu';
 import { SequenceModal } from './components/SequenceModal';
 import { useStrudel } from './useStrudel';
 import './App.css';
@@ -483,15 +481,12 @@ ${sequence.code.trim()}
           onMultiTrackToggle={() => setMultiTrackMode(!multiTrackMode)}
         />
 
-        {/* Creator Widgets - Always at top */}
-        <div className="widgets-section">
-          <AIPromptTile onPatternGenerated={handlePatternGenerated} />
-          <SampleTile
-            onSampleAdded={handleSampleDownloaded}
-            savedSamples={sequences.filter(s => s.isSample).map(s => ({ name: s.samplePath.split('/').pop(), path: s.samplePath }))}
-          />
-          <RecordingTile />
-        </div>
+        {/* Add button - fixed in top right */}
+        <AddMenu
+          onPatternGenerated={handlePatternGenerated}
+          onSampleAdded={handleSampleDownloaded}
+          savedSamples={sequences.filter(s => s.isSample).map(s => ({ name: s.samplePath.split('/').pop(), path: s.samplePath }))}
+        />
 
         {/* Sequence Tiles Grid */}
         <div className="sequences-grid">
