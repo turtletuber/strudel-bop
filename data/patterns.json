@@ -169,5 +169,23 @@
     "color": "#EC4899",
     "bpm": 120,
     "isAI": true
+  },
+  {
+    "id": "ai-1765946760042",
+    "name": "test",
+    "description": "test",
+    "code": "s(\"bd sd hh cp\")",
+    "color": "#EC4899",
+    "bpm": 120,
+    "isAI": true
+  },
+  {
+    "id": "ai-1765948464852",
+    "name": "hellloooooo",
+    "description": "hellloooooo",
+    "code": "stack(\n  s(\"bd*8\").gain(0.9),\n  s(\"~ hh hh ~ hh hh ~ hh\").gain(0.7),\n  note(\"<c4 e4 g4 c5>\").s(\"sawtooth\").decay(0.4).gain(0.6).cutoff(1000)\n)",
+    "color": "#EC4899",
+    "bpm": 120,
+    "isAI": true
   }
 ]

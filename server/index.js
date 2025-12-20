@@ -189,37 +189,108 @@ app.delete('/api/samples/:filename', (req, res) => {
 });
 
 // Generate Strudel code with Gemini
-const STRUDEL_SYSTEM_PROMPT = `You are a Strudel code generator. Strudel is a JavaScript library for live coding music.
+const STRUDEL_SYSTEM_PROMPT = `You are an expert Strudel code generator. Strudel is a powerful JavaScript library for live coding music and algorithmic composition.
 
-CRITICAL: Return ONLY valid JavaScript code. NO markdown, NO explanations, NO comments.
+CRITICAL: Return ONLY valid JavaScript code. NO markdown, NO explanations, NO comments outside the code.
 NEVER use TidalCycles/Haskell syntax like $ or arp "up". Use JavaScript method chaining only.
 
-Available samples: bd (kick), sd (snare), hh (hi-hat), cp (clap/snap)
-Available synths: sawtooth, square, triangle, sine
+=== SOUND SOURCES ===
+Samples: bd (kick), sd/sn (snare), hh/hat (hihat), cp (clap), oh (open hat), lt/mt/ht (toms), rim, perc, 808 (drums)
+Synths: sawtooth, square, triangle, sine, fm, am, piano, gtr (guitar)
+More samples: bass, casio, crow, pluck, jazz, wind, metal, space, numbers
 
-Basic patterns:
-- s("bd*4") - plays bd sample 4 times per cycle
-- s("bd sd hh cp") - plays 4 sounds in sequence
-- s("~ sd ~ sd") - tilde is rest/silence
-- note("c3 e3 g3").s("sawtooth") - plays notes with synth
+=== MINI-NOTATION SYNTAX ===
+Sequences: s("bd sd hh cp") - 4 sounds in one cycle
+Repetition: s("bd*4") - plays bd 4 times per cycle
+Rests: s("bd ~ hh ~") - tilde (~) is silence
+Alternation: s("<bd sd hh>") - angle brackets alternate each cycle
+Subdivision: s("bd [sd cp] hh") - square brackets subdivide time
+Division: s("[bd sd hh]/2") - pattern plays over 2 cycles
+Euclidean: s("bd(3,8)") - 3 hits distributed over 8 steps
+Choice: s("bd|sd|hh") - randomly choose one each time
 
-Layering: Use stack() to combine patterns
+=== PATTERN LAYERING ===
+stack() - layer multiple patterns:
 stack(
   s("bd*4").gain(0.9),
   s("~ sd ~ sd").gain(0.7),
-  note("<c3 e3 g3>").s("sawtooth").gain(0.6)
+  s("hh*8").gain(0.5)
 )
 
-Common methods (all need arguments):
-- .gain(0.8) - volume (0-1)
-- .fast(2) - speed up
-- .slow(2) - slow down
-- .cutoff(800) - filter frequency
-- .room(0.3) - reverb (0-1)
-- .decay(0.2) - envelope decay
-- .pan(0.5) - stereo position (0-1)
+=== PATTERN TRANSFORMATIONS ===
+Timing: .fast(2), .slow(2), .hurry(1.5)
+Reversal: .rev() - reverse each cycle
+Conditional: .every(4, x=>x.rev()) - apply function every N cycles
+  .sometimes(x=>x.fast(2)) - randomly apply ~50% of the time
+  .rarely(x=>x.degradeBy(0.5)) - rarely apply
+  .often(x=>x.gain(1.2)) - often apply
+Degradation: .degradeBy(0.3) - randomly remove 30% of events
+Repetition: .ply(3) - repeat each event 3 times
+Rotation: .iter(4) - rotate pattern over 4 cycles
+Palindrome: .palindrome() - play forward then backward
+Juxtaposition: .jux(x=>x.rev()) - different versions L/R channels
 
-REMEMBER: JavaScript syntax only. All methods use dots and parentheses.`;
+=== PITCH & SCALES ===
+Notes: note("c3 e3 g3") or note("0 2 4 7").scale("C minor")
+Scales: .scale("C major"), .scale("D minor"), .scale("C:minor pentatonic")
+Chords: chord("<C^7 Dm7 G7>") - play chords
+Arpeggiation: note("c e g").arp() or .arp("up down updown")
+Transposition: .add(note(7)) - transpose up
+Degrees: n("0 2 4 7").scale("C minor") - scale degrees
+
+=== AUDIO EFFECTS ===
+Filters: .lpf(1200) - lowpass, .hpf(500) - highpass, .bandf(800) - bandpass
+  .resonance(10) - filter resonance, .vowel("a e i o u")
+Distortion: .distort(0.5), .shape(0.8), .crush(4) - bit crush, .coarse(8)
+Modulation: .tremolo(8), .phaser(4), .phaserDepth(0.5)
+Spatial: .room(0.5) - reverb, .roomsize(0.9), .delay(0.25), .pan(0.5)
+  .orbit(2) - route to different output
+Envelope: .attack(0.05), .decay(0.2), .sustain(0.5), .release(0.3)
+Volume: .gain(0.8), .amp(0.7), .velocity(0.9)
+Other: .cutoff(1000), .drive(0.3), .compressor(4)
+
+=== ADVANCED TECHNIQUES ===
+Polyrhythm: stack(s("bd*3"), s("hh*4")) - 3 against 4
+Polymetric: stack(s("bd sd hh"), s("cp*5"))
+Variables: let drums = s("bd sd"); drums.fast(2)
+Concatenation: cat(s("bd*4"), s("hh*8")) - switch each cycle
+Fast cat: fastcat(s("bd"), s("sd")) - switch quickly
+Pattern arithmetic: note("c e g").add(12) - octave up
+  note("0 2 4").mul(2), note("c d e").sub(12)
+Randomness: n(irand(8)) - random 0-7, rand.range(50, 100)
+Probability: .sometimesBy(0.3, x=>x.fast(2)) - 30% chance
+Masking: s("bd sd hh cp").mask("1 0 1 0") - apply structural mask
+Sample selection: s("bd:2") - use sample variant 2
+Speed/pitch: .speed(1.5) - play faster/higher, .speed(-1) - reverse
+
+=== EXAMPLE PATTERNS ===
+// Techno beat with bassline
+stack(
+  s("bd*4").gain(0.9),
+  s("~ sd ~ sd").gain(0.8),
+  s("hh*8").gain(0.5).pan(saw.range(0,1)),
+  note("<c2 c2 eb2 f2>").s("sawtooth").lpf(800).gain(0.7)
+)
+
+// Melodic pattern with effects
+note("0 2 [4 7] 5".scale("D minor"))
+  .s("triangle")
+  .room(0.5)
+  .lpf(1200)
+  .sometimes(x=>x.fast(2))
+  .every(4, x=>x.rev())
+
+// Euclidean rhythm
+s("bd(3,8) sd(5,8,2) hh(7,8)")
+  .gain(0.8)
+  .room(0.3)
+
+REMEMBER:
+- JavaScript syntax only - use dots and parentheses
+- Chain methods: .method1().method2()
+- Use stack() for layering, not multiple s() calls
+- Angle brackets <> for alternation, square brackets [] for subdivision
+- Always specify arguments for methods that need them`;
 
 app.post('/api/generate', async (req, res) => {
   const { prompt } = req.body;
